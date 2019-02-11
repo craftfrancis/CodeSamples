@@ -1,0 +1,25 @@
+There are two methods in the CodeSamples.cs file, OrderForAggregating() and ToGeneralLedgerRows().
+
+The two methods are important as they were created to handle an unforseen problem. 
+It was the developers understanding at first that there'd be a one to one relationship between the transactions and the general ledger items.
+Transactions are objects created by and manipulate by the program. General Ledgers are the offical, 'stamped', objects that get sent to the bank.
+When it became known that there could be a many to one relationship between Transactions and GeneralLedger items, the goal was to find a way to relate them while the transactions are still in immediate scope of the function.
+Transaction items need to know the specific GeneralLedger they become part of.
+The initial, beta, version of this process immediately became weighty and both memory and process intensive.
+The two chosen functions were created to both solve the issue at hand, and be optimized.
+
+OrderForAggregating was set up as the first step in this process. The set of Transaction to be worked on were not in any specific order.
+OrderForAggregating places the Transactions in a sorted order by values as they are needed in the aggregation and then conversion.
+
+ToGeneralLedgerRows is the next step in the process. This is the bulk of the code sample, and the process as a whole.
+The method receives the, now ordered, list of Transactions.
+The high level process of this method is to step along the list, taking a count of the number to be aggregated, performing the aggregation, then stepping past that set.
+By stepping over the transactions following standard index, i, taking a count of how many more transactions to include, NumberOfPairedTransactions, the program calls:
+	rGeneralLedgerRows.AddRange(pTransactions.GetRange(i, (1 + NumberOfPairedTransactions)).ToGeneralLedgerRows());
+That code calls the aggregation and convesion.
+This is followed by some accounting code.
+The next line is where much of the headache comes from.
+	rGeneralLedgerRows.AddOrUpdate();
+This 'stamps' the GeneralLedger values. The reason this causes the headache is that GeneralLedger items have a place holder id until this.
+Without offical GeneralLedgerIds, the table's primary key, the working set of Transactions can't be mapped to them.
+Now with Ids, this working group of Transactions is given the value, then also Updated.
